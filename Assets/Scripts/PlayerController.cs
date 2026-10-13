@@ -17,6 +17,9 @@ public class PlayerController : MonoBehaviour {
     private Rigidbody2D rb2;
     private bool onFloor = false;
 
+    private bool jumping;
+	private bool wasJumping;
+
     private void Awake() {
         rb2 = GetComponent<Rigidbody2D>();
         rb2.isKinematic = true;
@@ -26,13 +29,7 @@ public class PlayerController : MonoBehaviour {
         contactFilter2D.useTriggers = false;
     }
 
-    private void FixedUpdate() {
-        float dt = Time.fixedDeltaTime;
-
-        Velocity.y -= Gravity * dt;
-
-        Vector2 movement = Velocity * dt;
-
+    private void collide(Vector2 movement) {
         int hitCount = rb2.Cast(
                 movement.normalized, contactFilter2D, hits, movement.magnitude
                 ); 
@@ -50,6 +47,36 @@ public class PlayerController : MonoBehaviour {
                 }
             }
         }
+    }
+
+    private void FixedUpdate() {
+        float dt = Time.fixedDeltaTime;
+
+        Velocity.y -= Gravity * dt;
+
+        Vector2 movement = Velocity * dt;
+        collide(movement);
+
         rb2.MovePosition(rb2.position + movement);
+    }
+    
+    private void Update() {
+        if (Input.GetKeyDown(KeyCode.Space) && onFloor) {
+			wasJumping = jumping;
+			jumping = true;
+			// TODO: Add initial jump burst
+		} 
+		if (Input.GetKeyUp(KeyCode.Space)) {
+			wasJumping = jumping;
+			jumping = false;
+		}
+
+		if (jumping) {
+			// TODO: add jump vel
+		}
+		
+		if (!jumping && wasJumping) {
+			// TODO add the jump hieght amount to the player
+		}
     }
 }
