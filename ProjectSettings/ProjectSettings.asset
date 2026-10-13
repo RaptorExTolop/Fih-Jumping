@@ -631,8 +631,8 @@ PlayerSettings:
   apiCompatibilityLevelPerPlatform: {}
   m_RenderingPath: 1
   m_MobileRenderingPath: 1
-  metroPackageName: Fih Jumps OMG!
-  metroPackageVersion: 
+  metroPackageName: FihJumpsOMG
+  metroPackageVersion: 1.0.0.0
   metroCertificatePath: 
   metroCertificatePassword: 
   metroCertificateSubject: 
@@ -640,7 +640,7 @@ PlayerSettings:
   metroCertificateNotAfter: 0000000000000000
   metroApplicationDescription: Fih Jumps OMG!
   wsaImages: {}
-  metroTileShortName: 
+  metroTileShortName: Fih Jumps OMG!
   metroTileShowName: 0
   metroMediumTileShowName: 0
   metroLargeTileShowName: 0
