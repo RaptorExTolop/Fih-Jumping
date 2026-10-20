@@ -438,6 +438,17 @@ MonoBehaviour:
   Gravity: 10
   initJumpHeight: 5
   JumpAmount: 4
+  Obstacle: {fileID: 6448113045243191574, guid: 155b2535ecb2cff49a45e491f9ab7940, type: 3}
+  NumObstacles: 5
+  ObstacleSpawnSpeedVariation: 0.1
+  ObstacleBaseSpawnSpeed: 4
+  obstacleSpawnTimer:
+    active: 0
+    finished: 0
+    length: 0
+    currentTime: 0
+  ObstacleHieghtVariation: 4
+  ObstacleSpawnPosition: {x: -9.5, y: -3}
 --- !u!50 &497225310
 Rigidbody2D:
   serializedVersion: 4
