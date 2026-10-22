@@ -190,8 +190,17 @@ public class PlayerController : MonoBehaviour {
         if (!dead) {
             update_player(dt);
             update_obstacles(dt);
-        }
-    }
+        } else {
+			if (Input.GetKeyUp(KeyCode.R)) {
+				dead = false;
+				transform.position = StartPosition;
+				Velocity = Vector2.zero;
+				foreach (GameObject obstacle in Obstacles) {
+					Destroy(obstacle);
+				}
+			}
+		}
+	}
 
     private void FixedUpdate() {
         float dt = Time.fixedDeltaTime;
@@ -212,14 +221,6 @@ public class PlayerController : MonoBehaviour {
             Velocity.y -= Gravity * dt;
             rb2.MovePosition(rb2.position + (Velocity * dt));
 
-            if (Input.GetKeyUp(KeyCode.R)) {
-                dead = false;
-                transform.position = StartPosition;
-                Velocity = Vector2.zero;
-                foreach (GameObject obstacle in Obstacles) {
-                    Destroy(obstacle);
-                }
-            }
         }
     }
 	
