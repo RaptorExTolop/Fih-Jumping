@@ -4,13 +4,11 @@ using System.Collections.Generic;
 using UnityEngine;
 
 // TODOs:
-// [ ] Add in the pillars
-// [ ] Move the pillars
-// [ ] Collide with the pillars
-// [ ] Die on collide
-// [ ] Game state goodness
-// [ ] Add in points
-// [ ] Save the points
+// [x] Add in the pillars
+// [x] Move the pillars
+// [x] Collide with the pillars
+// [x] Die on collide
+// [ ] Reset the game
 
 // NOTEs:
 // Obstacle height should be between 4 and 10 (2, 5)
@@ -52,22 +50,24 @@ public struct Timer {
 }
 
 public class PlayerController : MonoBehaviour {
-    public Vector2 Velocity =  Vector2.zero;
-    private ContactFilter2D contactFilter2D;
+    [SerializeField] public Vector2 Velocity = Vector2.zero;
+    [SerializeField] public Vector2 StartPosition;
     private RaycastHit2D[] hits = new RaycastHit2D[8];
+    private ContactFilter2D groundContactFilter2D;
+    private ContactFilter2D obstacleContactFilter2D;
 
 	// The time the player has held the jump button down
 	[SerializeField] private Timer jumpTimer      = new Timer(1.0f);
 	// The timer for the jump buffering grace 
 	[SerializeField] private Timer jumpGraceTimer = new Timer(0.3f);
-    public float Gravity        = 1.0f;
-    public float initJumpHeight = 1.0f;
-    public float JumpAmount     = 1.0f;
-	private float jumpAmount    = 0.0f;
+
+    public  float Gravity        = 1.0f;
+    public  float initJumpHeight = 1.0f;
+    public  float JumpAmount     = 1.0f;
+	private float jumpAmount     = 0.0f;
 
     private Rigidbody2D rb2;
     private bool onFloor = false;
-
     private bool jumping = false;
 
 	public GameObject    Obstacle;
@@ -80,27 +80,38 @@ public class PlayerController : MonoBehaviour {
 	[SerializeField] public float   ObstacleHieghtVariation     = 4f;
 	[SerializeField] public Vector2 ObstacleSpawnPosition       = new Vector2(0, 0);
 	[SerializeField] public float   ObstacleSpeed 			    = 4;
+    [SerializeField] public Vector2 ForwardDirection            = new Vector2(-1, 0);
+    [SerializeField] public float   ForwardCheckDepth           = 0.05f;
 
 	private int NextObstacleLocation = 0;
+
+    private bool dead = true;
 
     private void Awake() {
         rb2 = GetComponent<Rigidbody2D>();
         rb2.isKinematic = true;
 
-        contactFilter2D = new ContactFilter2D();
-        contactFilter2D.SetLayerMask(Physics2D.DefaultRaycastLayers);
-        contactFilter2D.useTriggers = false;
+        groundContactFilter2D = new ContactFilter2D();
+        groundContactFilter2D.SetLayerMask(Physics2D.DefaultRaycastLayers);
+        groundContactFilter2D.useTriggers = false;
+
+        groundContactFilter2D = new ContactFilter2D();
+        groundContactFilter2D.SetLayerMask(Physics2D.DefaultRaycastLayers);
+        groundContactFilter2D.useTriggers = true;
 
         Obstacles = new GameObject[NumObstacles]; // WHY; I cannot set it at global spot :(
 
 		jumpTimer.stop();
 		obstacleSpawnTimer.stop();
+
+        dead = false;
+        transform.position = StartPosition;
     }
 
-    private Vector2 collide(Vector2 movement) {
+    private Vector2 collide_with_floor(Vector2 movement) {
 		onFloor = false;
         int hitCount = rb2.Cast(
-                movement.normalized, contactFilter2D, hits, movement.magnitude
+                movement.normalized, groundContactFilter2D, hits, movement.magnitude
                 ); 
 
         RaycastHit2D hit;
@@ -119,6 +130,19 @@ public class PlayerController : MonoBehaviour {
         }
 
 		return movement;
+    }
+
+    private bool collide_with_front() {
+        int hitCount = rb2.Cast(
+                ForwardDirection.normalized, obstacleContactFilter2D, 
+                hits, ForwardCheckDepth
+                ); 
+
+        for (int i = 0; i < hitCount; ++i) {
+            if (hits[i].collider.CompareTag("Obstacle")) { return true; }
+        }
+
+		return false;
     }
 
 	private void update_player(float dt) {
@@ -163,20 +187,44 @@ public class PlayerController : MonoBehaviour {
 
     private void Update() {
 		float dt = Time.deltaTime;
-		update_player(dt);
-		update_obstacles(dt);
+        if (!dead) {
+            update_player(dt);
+            update_obstacles(dt);
+        }
     }
 
     private void FixedUpdate() {
         float dt = Time.fixedDeltaTime;
         Vector2 movement = Velocity * dt;
-        movement = collide(movement);
+        if (!dead) {
+            movement = collide_with_floor(movement);
+            dead     = collide_with_front();
 
-        rb2.MovePosition(rb2.position + movement);
+            if (dead) {
+                float DeathMovementRange = 5.0f;
+                float randomX = UnityEngine.Random.Range(-DeathMovementRange, DeathMovementRange);
+                float randomY = UnityEngine.Random.Range(DeathMovementRange * 0.75f, DeathMovementRange);
+                Vector2 RandomHitMovement = new Vector2(randomX, randomY);
+                Velocity = RandomHitMovement;
+            }
+            rb2.MovePosition(rb2.position + movement);
+        } else {
+            Velocity.y -= Gravity * dt;
+            rb2.MovePosition(rb2.position + (Velocity * dt));
+
+            if (Input.GetKeyUp(KeyCode.R)) {
+                dead = false;
+                transform.position = StartPosition;
+                Velocity = Vector2.zero;
+                foreach (GameObject obstacle in Obstacles) {
+                    Destroy(obstacle);
+                }
+            }
+        }
     }
 	
 	private void update_obstacles(float dt) {
-			obstacleSpawnTimer.active = true;
+        obstacleSpawnTimer.active = true;
 		if (obstacleSpawnTimer.finished) {
 			//Debug.Log("Spawning Obstacle");
 			{
@@ -200,3 +248,4 @@ public class PlayerController : MonoBehaviour {
 		}
 	}
 }
+

@@ -425,6 +425,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Velocity: {x: 0, y: 0}
+  StartPosition: {x: 4.5, y: -2.5}
   jumpTimer:
     active: 0
     finished: 0
@@ -439,6 +440,7 @@ MonoBehaviour:
   initJumpHeight: 5
   JumpAmount: 4
   Obstacle: {fileID: 6448113045243191574, guid: 155b2535ecb2cff49a45e491f9ab7940, type: 3}
+  Obstacles: []
   NumObstacles: 5
   ObstacleSpawnSpeedVariation: 0.1
   ObstacleBaseSpawnSpeed: 4
@@ -449,6 +451,9 @@ MonoBehaviour:
     currentTime: 0
   ObstacleHieghtVariation: 4
   ObstacleSpawnPosition: {x: -9.5, y: -3}
+  ObstacleSpeed: 4
+  ForwardDirection: {x: -1, y: 0}
+  ForwardCheckDepth: 0.05
 --- !u!50 &497225310
 Rigidbody2D:
   serializedVersion: 4
